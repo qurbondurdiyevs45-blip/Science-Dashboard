@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BioChem - Ilmiy Ensiklopediya</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap');
+        body { font-family: 'Space Grotesk', sans-serif; background-color: #050505; color: #fafafa; }
+        .science-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); }
+        .science-card:hover { border-color: #10b981; transform: scale(1.01); transition: all 0.2s; }
+        .glow-text { text-shadow: 0 0 15px rgba(16, 185, 129, 0.5); }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useMemo } = React;
+
+        const BIO_CHEM_DB = [
+            // KIMYO
+            { id: 1, term: "Katalizator", type: "Kimyo", sub: "Anorganik", def: "Kimyoviy reaksiyani tezlashtiruvchi, lekin o'zi sarflanmaydigan modda." },
+            { id: 2, term: "Valentlik", type: "Kimyo", sub: "Umumiy", def: "Atomning boshqa atomlar bilan ma'lum sondagi kimyoviy bog' hosil qilish xususiyati." },
+            { id: 3, term: "Polimerlanish", type: "Kimyo", sub: "Organik", def: "Kichik molekulalardan (monomerlardan) ulkan molekulalar hosil bo'lish jarayoni." },
+            { id: 4, term: "Elektroliz", type: "Kimyo", sub: "Fizik-Kimyo", def: "Elektr toki ta'sirida moddalarning parchalanish jarayoni." },
+            
+            // BIOLOGIYA
+            { id: 5, term: "Mitoz", type: "Biologiya", sub: "Sitologiya", def: "Hujayraning ikki teng qismga bo'linishi, irsiy ma'lumotning saqlanishini ta'minlaydi." },
+            { id: 6, term: "Fotosintez", type: "Biologiya", sub: "Botanika", def: "Yorug'lik energiyasi ta'sirida organik bo'lmagan moddalardan organik moddalar sintezi." },
+            { id: 7, term: "Genotip", type: "Biologiya", sub: "Genetika", def: "Organizmdagi barcha genlarning yig'indisi." },
+            { id: 8, term: "Gomeostaz", type: "Biologiya", sub: "Fiziologiya", def: "Organizmdagi ichki muhit barqarorligining saqlanishi." },
+            { id: 9, term: "Fermentlar", type: "Biologiya", sub: "Biokimyo", def: "Biologik katalizatorlar vazifasini bajaruvchi oqsil molekulalari." },
+            { id: 10, term: "Ribosomalar", type: "Biologiya", sub: "Sitologiya", def: "Hujayra ichidagi oqsil sintez qiluvchi organoidlar." }
+        ];
+
+        const App = () => {
+            const [search, setSearch] = useState("");
+            const [activeType, setActiveType] = useState("Hammasi");
+
+            const filteredData = useMemo(() => {
+                return BIO_CHEM_DB.filter(item => {
+                    const matchesSearch = item.term.toLowerCase().includes(search.toLowerCase()) || 
+                                          item.def.toLowerCase().includes(search.toLowerCase());
+                    const matchesType = activeType === "Hammasi" || item.type === activeType;
+                    return matchesSearch && matchesType;
+                });
+            }, [search, activeType]);
+
+            return (
+                <div className="min-h-screen">
+                    {/* Hero Section */}
+                    <header className="py-12 px-4 border-b border-emerald-500/20 bg-gradient-to-b from-emerald-900/10 to-transparent">
+                        <div className="max-w-4xl mx-auto text-center">
+                            <h1 className="text-5xl font-bold glow-text text-emerald-400 mb-4 tracking-tighter">BioChem Explorer</h1>
+                            <p className="text-gray-400">Kimyo va Biologiya olami bo'ylab raqamli sayohat</p>
+                        </div>
+                    </header>
+
+                    <main className="max-w-5xl mx-auto p-6 md:p-10">
+                        {/* Control Panel */}
+                        <div className="flex flex-col md:flex-row gap-6 mb-12">
+                            <input 
+                                type="text" 
+                                placeholder="Termin yoki jarayonni qidiring..." 
+                                className="flex-1 bg-white/5 border border-white/10 rounded-2xl py-4 px-6 outline-none focus:ring-2 ring-emerald-500/50 transition-all"
+                                onChange={(e) => setSearch(e.target.value)}
+                            />
+                            <div className="flex bg-white/5 p-1 rounded-2xl border border-white/10">
+                                {["Hammasi", "Kimyo", "Biologiya"].map(btn => (
+                                    <button 
+                                        key={btn}
+                                        onClick={() => setActiveType(btn)}
+                                        className={`px-8 py-3 rounded-xl transition-all ${activeType === btn ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'text-gray-400 hover:text-white'}`}
+                                    >
+                                        {btn}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Stats */}
+                        <div className="mb-8 text-sm text-gray-500 flex justify-between items-center">
+                            <span>Laboratoriya bazasida <b className="text-emerald-400">{filteredData.length}</b> ta termin topildi</span>
+                        </div>
+
+                        {/* Results Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {filteredData.length > 0 ? filteredData.map(item => (
+                                <div key={item.id} className="science-card p-6 rounded-3xl relative overflow-hidden group">
+                                    <div className={`absolute top-0 right-0 w-24 h-24 blur-3xl opacity-10 ${item.type === 'Kimyo' ? 'bg-blue-500' : 'bg-emerald-500'}`}></div>
+                                    
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div className="bg-white/10 text-[10px] font-bold px-2 py-1 rounded text-gray-300 uppercase tracking-widest">
+                                            {item.sub}
+                                        </div>
+                                        <div className={`w-3 h-3 rounded-full ${item.type === 'Kimyo' ? 'bg-blue-400' : 'bg-emerald-400'}`}></div>
+                                    </div>
+
+                                    <h3 className="text-2xl font-bold mb-3 group-hover:text-emerald-400 transition-colors">{item.term}</h3>
+                                    <p className="text-gray-400 text-sm leading-relaxed mb-4">{item.def}</p>
+                                    
+                                    <div className="flex items-center gap-2 text-[11px] font-semibold text-emerald-500/80 uppercase">
+                                        <span># {item.type}</span>
+                                    </div>
+                                </div>
+                            )) : (
+                                <div className="col-span-full py-20 text-center science-card rounded-3xl">
+                                    <p className="text-gray-500 italic">Hech qanday laboratoriya ma'lumoti topilmadi...</p>
+                                </div>
+                            )}
+                        </div>
+                    </main>
+
+                    {/* Footer */}
+                    <footer className="py-12 border-t border-white/5 mt-20">
+                        <div className="max-w-4xl mx-auto text-center px-4">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8 text-xs text-gray-500">
+                                <div><h4 className="text-gray-300 mb-2 font-bold">BIO</h4>Genetika, Zoologiya, Botanika</div>
+                                <div><h4 className="text-gray-300 mb-2 font-bold">CHEM</h4>Organika, Kinetika, Analitika</div>
+                                <div><h4 className="text-gray-300 mb-2 font-bold">DATA</h4>2000+ Terminlar, Formulalar</div>
+                                <div><h4 className="text-gray-300 mb-2 font-bold">DEV</h4>NexGen Scientific Platform</div>
+                            </div>
+                            <p className="text-[10px] text-gray-600">Sardorbek Qurbondurdiyev | IT Park Khorezm | 2026</p>
+                        </div>
+                    </footer>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
